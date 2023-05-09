@@ -21,6 +21,37 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 void Player::Updete()
 {
+	//スケーリング行列を宣言
+	Matrix4x4 matScale; // 4行4列
+
+	matScale.m[0][0] = worldTransform_.scale_.x;
+	matScale.m[1][1] = worldTransform_.scale_.y;
+	matScale.m[2][2] = worldTransform_.scale_.z;
+	matScale.m[3][3] = 1;
+
+	//x,y,z方向の回転を設定
+	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
+
+	//ワールドトランスフォームの初期化
+	worldTransform_.Initialize();
+
+	//x軸回転行列を宣言
+	Matrix4x4 matRotX;
+	matRotX.m[0][0] = 1;
+	matRotX.m[1][1] = cosf(worldTransform_.rotation_.x);
+	matRotX.m[2][1] = -sinf(worldTransform_.rotation_.x);
+	matRotX.m[1][2] = sinf(worldTransform_.rotation_.x);
+	matRotX.m[2][2] = cosf(worldTransform_.rotation_.x);
+	matRotX.m[3][3] = 1;
+
+	// 行列の転送 行列の計算後に行う
+	worldTransform_.TransferMatrix();
+
+	worldTransform_.matWorld_;
+
+	worldTransform_.matWorld_ =
+	    worldTransform_.scale_ * worldTransform_.rotation_ * worldTransform_.matWorld_;
+
 	//行列を定数バッファに転送
 	worldTransform_.TransferMatrix();
 
@@ -45,7 +76,11 @@ void Player::Updete()
 	}
 
 	//座標移動(ベクトルの加算)
-	//worldTransform_.translation_ += move;
+	worldTransform_.translation_.x += move.x;
+	worldTransform_.translation_.y += move.y;
+	worldTransform_.translation_.z += move.z;
+
+	
 }
 
 void Player::Draw(ViewProjection& viewProjection) 
