@@ -23,6 +23,7 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//自キャラの初期化
 	player_->Initialize(model_,textureHandle_);
+
 }
 
 void GameScene::Update() {
