@@ -2,6 +2,8 @@
 #include "Model.h"
 #include "WorldTransform.h"
 #include "Input.h"
+#include "ImGuiManager.h"
+#include "PlayerBullet.h"
 
 ///<summary>
 ///自キャラ
@@ -19,11 +21,17 @@ public:
 	/// 更新
 	///</summary>
 	void Updete();
+	void Rotate();
 
 	///< summary>
 	/// 描画
 	///</summary>
 	void Draw(ViewProjection& viewProjection);
+
+	/// <summary>
+	/// 攻撃
+	/// </summary>
+	void Attack();
 
 private:
 	//ワールド変換データ
@@ -34,4 +42,8 @@ private:
 	uint32_t textureHandle_ = 0u;
 	//キーボード入力
 	Input* input_ = nullptr;
+	//ImGuiで値を入力する変数
+	float inputFloat3[3] = {0, 0, 0};
+	//弾
+	PlayerBullet* bullet_ = nullptr;
 };
