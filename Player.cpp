@@ -1,6 +1,5 @@
 ﻿#include "Player.h"
 #include <cassert>
-#include"MatrixMath.h"
 
 //bullet_の開放
 Player::~Player() 
@@ -27,15 +26,25 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
 
 	// X,Y,Z方向のスケーリングを設定
-	worldTransform_.translation_ = {0.0f, 0.0f, 0.0f};
+	worldTransform_.translation_ = {0.0f, 0.0f, -20.0f};
 
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 
+	worldTransform_.UpdateMatrix();
 }
 
-void Player::Updete()
+void Player::Update()
 {
+	// デスフラグが立った弾を削除
+	bullets_.remove_if([](PlayerBullet * bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
+		}
+		return false;
+	});
+
 	// キャラクターの移動ベクトル
 	Vector3 move = {0, 0, 0};
 
@@ -122,12 +131,8 @@ void Player::Updete()
 	worldTransform_.matWorld_ =
 		Multiply(matScale,Multiply(matRot ,matTrans));
 
-	// 行列更新
-	worldTransform_.matWorld_ = MakeAffineMatrix(
-	    worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
-
 	// 行列の転送
-	worldTransform_.TransferMatrix();
+	worldTransform_.UpdateMatrix();
 
 	//キャラクターの座標を画面表示する処理
 	ImGui::Begin("Debug");
@@ -138,12 +143,14 @@ void Player::Updete()
 	};
 	ImGui::SliderFloat3("PlayerPos", playerPos, -kMoveLimitX, kMoveLimitX);
 
-	//↑処理のままだとSliderFloat3でplayerPosの値を変えているので実際の座標(translation)が
+	//↑処理のままだとSliderFloat3で、playerPosの値を変えているので実際の座標(translation)が
 	//変わってないのでここで変更する
 	worldTransform_.translation_.x = playerPos[0];
 	worldTransform_.translation_.y = playerPos[1];
 	worldTransform_.translation_.z = playerPos[2];
 	ImGui::End();
+
+	Rotate();
 
 	//キャラクター攻撃処理
 	Attack();
@@ -159,9 +166,9 @@ void Player::Rotate() {
 	const float kRotSpeed = 0.02f;
 
 	// 押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_A)) {
+	if (input_->PushKey(DIK_D)) {
 		worldTransform_.rotation_.y = worldTransform_.rotation_.y - kRotSpeed;
-	} else if (input_->PushKey(DIK_D)) {
+	} else if (input_->PushKey(DIK_A)) {
 		worldTransform_.rotation_.y = worldTransform_.rotation_.y + kRotSpeed;
 	}
 }
@@ -173,7 +180,7 @@ void Player::Draw(ViewProjection& viewProjection)
 
 	//弾描画
 	for (PlayerBullet* bullet : bullets_) {
-		bullet->Drow(viewProjection);
+		bullet->Draw(viewProjection);
 	}
 }
 
@@ -186,11 +193,29 @@ void Player::Attack() {
 		//	bullet_ = nullptr;
 		//}
 
+		//弾の速度
+		const float kBulletSpeed = 1.0f;
+		Vector3 velocity(0, 0, kBulletSpeed);
+
+		//速度ベクトルを自機の向きに合わせて回転させる
+		velocity = TransformNormal(velocity, worldTransform_.matWorld_);
+
 		//弾を生成し初期化
 		PlayerBullet* newBullet = new PlayerBullet();
-		newBullet->Initialize(model_, worldTransform_.translation_);
+		newBullet->Initialize(model_, worldTransform_.translation_,velocity);
 
 		//弾を登録する
 		bullets_.push_back(newBullet);
 	}
+}
+
+Vector3 Player::GetWorldPosition() {
+	// ワールド座標を入れる変数
+	Vector3 worldPos;
+	// ワールド行列の平行移動成分を取得(ワールド座標)
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+
+	return worldPos;
 }

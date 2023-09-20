@@ -9,6 +9,7 @@ GameScene::~GameScene() {
 	delete model_;
 	delete player_;
 	delete debugCamera_;
+	delete enemy_;
 }
 
 void GameScene::Initialize() {
@@ -17,7 +18,7 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	//ファイル名を指定してテクスチャを読み込む
-	textureHandle_ = TextureManager::Load("uvChecker.png");
+	textureHandle_ = TextureManager::Load("Steve.jpg");
 	model_ = Model::Create();
 	//ビュープロジェクションの初期化
 	viewProjection_.Initialize();
@@ -25,17 +26,32 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//自キャラの初期化
 	player_->Initialize(model_,textureHandle_);
+
+	// ファイル名を指定してテクスチャを読み込む
+	enemyTextureHandle_ = TextureManager::Load("creeper.png");
+	enemyModel_ = Model::Create();
+	// 敵キャラの生成
+	enemy_ = new Enemy();
+	// 敵キャラに自キャラのアドレスを渡す
+	enemy_->SetPlayer(player_);
+	// 敵キャラの初期化
+	enemy_->Initialize(enemyModel_, enemyTextureHandle_);
+
 	//デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
 	//軸方向表示の表示を有効にする
 	AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参照するビュープロジェクションを指定する(アドレス渡し)
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
+	
+	
 }
 
 void GameScene::Update() {
 	//自キャラの更新
-	player_->Updete();
+	player_->Update();
+	// 自キャラの更新
+	enemy_->Update();
 	// デバッグカメラの更新
 	debugCamera_->Update();
 #ifdef _DEBUG
@@ -89,6 +105,12 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	//自キャラの描画
 	player_->Draw(viewProjection_);
+	/// </summary>
+
+	/// <summary>
+	/// ここに3Dオブジェクトの描画処理を追加できる
+	// 自キャラの描画
+	enemy_->Draw(viewProjection_);
 	/// </summary>
 
 	// 3Dオブジェクト描画後処理

@@ -5,6 +5,7 @@
 #include "ImGuiManager.h"
 #include "PlayerBullet.h"
 #include <list>
+#include"MatrixMath.h"
 
 ///<summary>
 ///自キャラ
@@ -21,7 +22,7 @@ public:
 	///< summary>
 	/// 更新
 	///</summary>
-	void Updete();
+	void Update();
 	void Rotate();
 
 	///< summary>
@@ -38,6 +39,9 @@ public:
 	/// デストラクタ
 	/// </summary>
 	~Player();
+
+	// ワールド座標を取得
+	Vector3 GetWorldPosition();
 
 private:
 	//ワールド変換データ
