@@ -37,11 +37,20 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle) {
 
 void Enemy::Update() {
 
+	// デスフラグが立った弾を削除
+	bullets_.remove_if([](EnemyBullet* bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
+		}
+		return false;
+	});
+
 	// キャラクターの移動ベクトル
 	Vector3 move = {0, 0, 0};
 
 	// キャラクターの移動速さ
-	const float kCaracterSpeed = 0.05f;
+	const float kCaracterSpeed = 0.0f;
 
 	move.z -= kCaracterSpeed;
 
@@ -130,4 +139,8 @@ Vector3 Enemy::GetWorldPosition() {
 	worldPos.z = worldTransform_.matWorld_.m[3][2];
 
 	return worldPos;
+}
+
+void Enemy::OnCollision() {
+
 }

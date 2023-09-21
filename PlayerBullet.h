@@ -26,7 +26,12 @@ public:
 	/// <param name="viewProjection">ビュープロジェクション</param>
 	void Draw(const ViewProjection& viewProjection);
 
+	Vector3 GetWorldPosition();
+
 	bool IsDead() const { return isDead_; }
+
+	// 衝突を検出したら呼び出されるコールバック関数
+	void OnCollision();
 
 private:
 	// ワールド変換データ
