@@ -50,7 +50,7 @@ void Enemy::Update() {
 	Vector3 move = {0, 0, 0};
 
 	// キャラクターの移動速さ
-	const float kCaracterSpeed = 0.0f;
+	const float kCaracterSpeed = 0.05f;
 
 	move.z -= kCaracterSpeed;
 
