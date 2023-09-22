@@ -25,8 +25,11 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	//自キャラの生成
 	player_ = new Player();
+	//自キャラとレールカメラの親子関係を結ぶ
+	player_->SetParent(&railCamera_->GetWorldTransform());
+	Vector3 playerPosition(0,0,30);
 	//自キャラの初期化
-	player_->Initialize(model_,textureHandle_);
+	player_->Initialize(model_,textureHandle_,playerPosition);
 
 	// ファイル名を指定してテクスチャを読み込む
 	enemyTextureHandle_ = TextureManager::Load("creeper.png");
@@ -43,6 +46,10 @@ void GameScene::Initialize() {
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_->Initialize(modelSkydome_);
 
+	//レールカメラの生成
+	railCamera_ = new RailCamera();
+	railCamera_->Initialize(worldPos_, rotation_);
+
 	//デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
 	//軸方向表示の表示を有効にする
@@ -50,8 +57,9 @@ void GameScene::Initialize() {
 	//軸方向表示が参照するビュープロジェクションを指定する(アドレス渡し)
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
 	
-	
-}
+	player_->SetParent(&railCamera_->GetWorldTransform());
+
+} 
 
 void GameScene::Update() {
 	//自キャラの更新
@@ -60,6 +68,8 @@ void GameScene::Update() {
 	enemy_->Update();
 	// デバッグカメラの更新
 	debugCamera_->Update();
+	//レールカメラの更新
+	railCamera_->Update();
 	//衝突判定の更新
 	GameScene::CheckAllCollisions();
 #ifdef _DEBUG
@@ -80,8 +90,10 @@ void GameScene::Update() {
 		//ビュープロジェクション行列の転送
 		viewProjection_.TransferMatrix();
 	} else {
+		viewProjection_.matView = railCamera_->GetViewProjection().matView;
+		viewProjection_.matProjection = railCamera_->GetViewProjection().matProjection;
 		//ビュープロジェクション行列の更新と転送
-		viewProjection_.UpdateMatrix();
+		viewProjection_.TransferMatrix();
 	}
 
 }

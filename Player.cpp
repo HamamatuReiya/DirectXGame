@@ -9,8 +9,7 @@ Player::~Player()
 	}
 }
 
-void Player::Initialize(Model* model, uint32_t textureHandle) 
-{ 
+void Player::Initialize(Model* model, uint32_t textureHandle, Vector3 playerPosition) { 
 	assert(model);
 
 	model_ = model;
@@ -25,8 +24,8 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	// x,y,z方向の回転を設定
 	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
 
-	// X,Y,Z方向のスケーリングを設定
-	worldTransform_.translation_ = {0.0f, 0.0f, -20.0f};
+	// X,Y,Z方向の平行移動を設定
+	worldTransform_.translation_ = playerPosition;
 
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
@@ -198,11 +197,11 @@ void Player::Attack() {
 		Vector3 velocity(0, 0, kBulletSpeed);
 
 		//速度ベクトルを自機の向きに合わせて回転させる
-		velocity = TransformNormal(velocity, worldTransform_.matWorld_);
+		velocity = TransformNormal(velocity,worldTransform_.matWorld_);
 
 		//弾を生成し初期化
 		PlayerBullet* newBullet = new PlayerBullet();
-		newBullet->Initialize(model_, worldTransform_.translation_,velocity);
+		newBullet->Initialize(model_, GetWorldPosition(), velocity);
 
 		//弾を登録する
 		bullets_.push_back(newBullet);
@@ -222,4 +221,9 @@ Vector3 Player::GetWorldPosition() {
 
 void Player::OnCollision(){
 
+}
+
+void Player::SetParent(const WorldTransform* parent) {
+	//親子関係を結ぶ
+	worldTransform_.parent_ = parent;
 }

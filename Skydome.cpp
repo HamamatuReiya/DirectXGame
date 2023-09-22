@@ -17,7 +17,7 @@ void Skydome::Initialize(Model* model) {
 	// x,y,z方向の回転を設定
 	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
 
-	// X,Y,Z方向のスケーリングを設定
+	// X,Y,Z方向の平行移動を設定
 	worldTransform_.translation_ = {0.0f, 0.0f, 0.0f};
 
 	worldTransform_.Initialize();

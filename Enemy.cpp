@@ -21,8 +21,8 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle) {
 	// x,y,z方向の回転を設定
 	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
 
-	// X,Y,Z方向のスケーリングを設定
-	worldTransform_.translation_ = {10.0f, 0.0f, 20.0f};
+	// X,Y,Z方向の平行移動を設定
+	worldTransform_.translation_ = {10.0f, 0.0f, 50.0f};
 
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
@@ -32,7 +32,6 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle) {
 
 	//接近フェーズ初期化
 	InitializeApproach();
-
 }
 
 void Enemy::Update() {

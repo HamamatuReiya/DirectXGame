@@ -17,7 +17,7 @@ public:
 	///</summary>
 	///<param name="model">モデル</param> 
 	///<param name="textureHandle">テクスチャハンドル</param>
-	void Initialize(Model* model,uint32_t textureHandle);
+	void Initialize(Model* model, uint32_t textureHandle, Vector3 playerPosition);
 
 	///< summary>
 	/// 更新
@@ -39,6 +39,12 @@ public:
 	/// デストラクタ
 	/// </summary>
 	~Player();
+
+	/// <summary>
+	/// 親となるワールドトランスフォームをセット
+	/// </summary>
+	///< param name="model">親となるワールドトランスフォームをセット</param> 
+	void SetParent(const WorldTransform* parent);
 
 	// ワールド座標を取得
 	Vector3 GetWorldPosition();
