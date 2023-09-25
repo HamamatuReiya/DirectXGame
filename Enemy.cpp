@@ -1,55 +1,30 @@
 ﻿#include"Enemy.h"
-#include <cassert>
 #include"Player.h"
+#include "GameScene.h"
 
-// bullet_の開放
-Enemy::~Enemy() {
-	for (EnemyBullet* bullet : bullets_) {
-		delete bullet;
-	}
-}
-
-void Enemy::Initialize(Model* model, uint32_t textureHandle) {
+void Enemy::Initialize(Model* model, Vector3& position, const Vector3& velocity) {
 	assert(model);
 
 	model_ = model;
-	textureHandle_ = textureHandle;
-
-	// x,y,z方向のスケーリングを設定
-	worldTransform_.scale_ = {1.0f, 1.0f, 1.0f};
-
-	// x,y,z方向の回転を設定
-	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
-
-	// X,Y,Z方向の平行移動を設定
-	worldTransform_.translation_ = {10.0f, 0.0f, 50.0f};
+	textureHandle_ = TextureManager::Load("creeper.png");
 
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 
-	// 行列の転送
-	worldTransform_.UpdateMatrix();
+	// x,y,z方向の回転を設定
+	worldTransform_.translation_ = position;
 
-	//接近フェーズ初期化
-	InitializeApproach();
+	// X,Y,Z方向の平行移動を設定
+	velocity_ = velocity;
 }
 
 void Enemy::Update() {
-
-	// デスフラグが立った弾を削除
-	bullets_.remove_if([](EnemyBullet* bullet) {
-		if (bullet->IsDead()) {
-			delete bullet;
-			return true;
-		}
-		return false;
-	});
 
 	// キャラクターの移動ベクトル
 	Vector3 move = {0, 0, 0};
 
 	// キャラクターの移動速さ
-	const float kCaracterSpeed = 0.05f;
+	const float kCaracterSpeed = 0.1f;
 
 	move.z -= kCaracterSpeed;
 
@@ -61,9 +36,9 @@ void Enemy::Update() {
 		//移動(ベクトルを加算)
 		worldTransform_.translation_ = Add(worldTransform_.translation_, move);
 		//既定の位置に到達したら離脱
-		if (worldTransform_.translation_.z < 0.0f) {
-			phase_ = Phase::Leave;
-		}
+		//if (worldTransform_.translation_.z < 0.0f) {
+		//	phase_ = Phase::Leave;
+		//}
 		break;
 	case Phase::Leave:
 		// 移動(ベクトルを加算)
@@ -74,18 +49,13 @@ void Enemy::Update() {
 	}
 
 	// 発射タイマーカウントダウン
-	fireTimer -= 1;
+	fireTimer_--;
 	// 指定時間に達した
-	if (fireTimer <= 0) {
-		// 弾を発射
+	if (fireTimer_ <= 0) {
+		// 弾の発射
 		Fire();
 		// 発射タイマーを初期化
-		fireTimer = kFireInterval;
-	}
-
-	// 弾更新
-	for (EnemyBullet* bullet : bullets_) {
-		bullet->Update();
+		fireTimer_ = kFireInterval;
 	}
 
 	// 行列の転送
@@ -95,17 +65,10 @@ void Enemy::Update() {
 void Enemy::Draw(const ViewProjection& viewProjection) {
 
 	model_->Draw(worldTransform_, viewProjection, textureHandle_);
-
-	// 弾描画
-	for (EnemyBullet* bullet : bullets_) {
-		bullet->Draw(viewProjection);
-	}
+	
 }
 
 void Enemy::Fire() {
-
-	// 速度ベクトルを自機の向きに合わせて回転させる
-	// velocity = TransformNormal(velocity, worldTransform_.matWorld_);
 
 	assert(player_);
 
@@ -120,13 +83,7 @@ void Enemy::Fire() {
 	//弾を生成し、初期化
 	EnemyBullet* newBullet =  new EnemyBullet();
 	newBullet->Initialize(model_, worldTransform_.translation_,velocity);
-
-	// 弾を登録する
-	bullets_.push_back(newBullet);
-}
-
-void Enemy::InitializeApproach() {
-	
+	gameScene_->AddEnemyBullet(newBullet);
 }
 
 Vector3 Enemy::GetWorldPosition() {
@@ -140,6 +97,6 @@ Vector3 Enemy::GetWorldPosition() {
 	return worldPos;
 }
 
-void Enemy::OnCollision() {
-
+void Enemy::OnCollision() { 
+	isDead_ = true;
 }

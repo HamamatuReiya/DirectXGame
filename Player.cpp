@@ -186,12 +186,6 @@ void Player::Draw(ViewProjection& viewProjection)
 void Player::Attack() { 
 	if (input_->TriggerKey(DIK_SPACE)) {
 
-		////弾があれば開放する
-		//if (bullet_) {
-		//	delete bullet_;
-		//	bullet_ = nullptr;
-		//}
-
 		//弾の速度
 		const float kBulletSpeed = 1.0f;
 		Vector3 velocity(0, 0, kBulletSpeed);

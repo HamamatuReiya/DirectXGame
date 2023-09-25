@@ -6,11 +6,13 @@
 #include <list>
 
 class Player;
+//GameSceneの前方宣言(苦肉の策)
+class GameScene;
 
 class Enemy {
 public:
 
-	void Initialize(Model* model, uint32_t textureHandle);
+	void Initialize(Model* model, Vector3& position, const Vector3& velocity);
 
 	void Update();
 
@@ -18,13 +20,8 @@ public:
 
 	void Fire();
 
-	~Enemy();
-
 	// 発射間隔
 	static const int kFireInterval = 60;
-
-	//接近フェーズの初期化
-	void InitializeApproach();
 	
 	// 自キャラ
 	Player* player_ = nullptr;
@@ -36,9 +33,15 @@ public:
 
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision();
+	
+	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 
-	// 弾リストを取得
-	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; };
+	bool IsDead() const { return isDead_; }
+
+	float radius = 3;
+
+	// ゲームシーン
+	GameScene* gameScene_ = nullptr;
 
 private:
 	// ワールド変換データ
@@ -56,7 +59,11 @@ private:
 	Phase phase_ = Phase::Approach;
 	// 弾
 	EnemyBullet* bullet_ = nullptr;
-	std::list<EnemyBullet*> bullets_;
+	// 速度
+	Vector3 velocity_;
 	//発射タイマー
-	int32_t fireTimer = 0;
+	int32_t fireTimer_ = 0;
+	// デスフラグ
+	bool isDead_ = false;
+	
 };
